@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+        <form id="weather-form">
+            <input type="text" id="city-input" placeholder="Enter city name" required>
+            <button type="submit">Get Weather</button>
+        </form>
+        <div id="weather-result" class="hidden">
+            <h2 id="city-name"></h2>
+            <p id="temperature"></p>
+            <p id="weather-description"></p>
+        </div>
+        <div id="error-message" class="hidden"></div>
+    </div>
+
+    <script>
+        document.getElementById('weather-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const city = document.getElementById('city-input').value;
+            fetch('/get_weather', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'city=' + encodeURIComponent(city)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('city-name').textContent = data.city;
+                    document.getElementById('temperature').textContent = `Temperature: ${data.temperature}°C`;
+                    document.getElementById('weather-description').textContent = `Weather: ${data.weather}`;
+                    document.getElementById('weather-result').classList.remove('hidden');
+                    document.getElementById('error-message').classList.add('hidden');
+                } else {
+                    document.getElementById('error-message').textContent = `Error: ${data.error}`;
+                    document.getElementById('error-message').classList.remove('hidden');
+                    document.getElementById('weather-result').classList.add('hidden');
+                }
+            })
+            .catch(error => {
+                document.getElementById('error-message').textContent = 'An error occurred. Please try again.';
+                document.getElementById('error-message').classList.remove('hidden');
+                document.getElementById('weather-result').classList.add('hidden');
+            });
+        });
+    </script>
+</body>
+</html>
